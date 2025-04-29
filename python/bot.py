@@ -33,17 +33,19 @@ async def on_message(message):
     if message.upper()[0:8] in readList and not(isJournaling):
         #read from file
         now = time.gmtime()
-        print(now)
+        print("read entry")
     if message.upper() in startList and not(isJournaling):
         await message.channel.send("What is on the mind?")
+        print("started entry")
         isJournaling = True
     if isJournaling:
         if message.upper() in endList:
             isJournaling = False
+            print("ended entry")
         else:
             #write to file
             now = time.gmtime()
-            print(now)
+            print("wrote entry")
 
 
         
