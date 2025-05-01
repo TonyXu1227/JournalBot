@@ -9,7 +9,7 @@ from discord.ext import commands
 
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
-print(TOKEN)
+#print(TOKEN)
 client = commands.Bot(command_prefix = "!", intents=discord.Intents.all())
 
 isJournaling = False
