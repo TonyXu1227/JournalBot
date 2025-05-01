@@ -1,5 +1,6 @@
 # bot.py
 import os
+import time
 import random
 import discord
 from rich import print
@@ -12,10 +13,10 @@ TOKEN = os.getenv('TOKEN')
 #print(TOKEN)
 client = commands.Bot(command_prefix = "!", intents=discord.Intents.all())
 
-isJournaling = False
-startList = ["START JOURNAL", "START_LOG", "START ENTRY", "START JOURNALING", "NEW ENTRY", "NEW LOG"]
-endList = ["END JORNAL", "END LOG", "END ENTRY", "STOP JOURNALING", "STOP ENTRY"]
+startList = [".START_JOURNAL", ".START_LOG", ".START_ENTRY", ".START_JOURNALING", ".NEW_ENTRY", ".NEW_LOG"]
+endList = [".END_JORNAL", ".END_LOG", ".END_ENTRY", ".STOP_JOURNALING", ".STOP_ENTRY"]
 readList = ["READ FROM"]
+
 
 @client.event
 async def on_ready():
@@ -26,20 +27,24 @@ async def on_ready():
     except Exception as e:
         print(e)
 
+isJournaling = False
 @client.event
 async def on_message(message):
+    global isJournaling
+    global time
     if message.author == client.user:
         return
-    if message.upper()[0:8] in readList and not(isJournaling):
+    if message.content.upper()[0:8] in readList and not(isJournaling):
         #read from file
         now = time.gmtime()
         print("read entry")
-    if message.upper() in startList and not(isJournaling):
+    if message.content.upper() in startList and not(isJournaling):
         await message.channel.send("What is on the mind?")
         print("started entry")
         isJournaling = True
     if isJournaling:
-        if message.upper() in endList:
+        if message.content.upper() in endList:
+            await message.channel.send("What a day!")
             isJournaling = False
             print("ended entry")
         else:
