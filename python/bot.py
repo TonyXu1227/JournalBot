@@ -1,6 +1,6 @@
 # bot.py
 import os
-import time
+import datetime
 import random
 import discord
 from rich import print
@@ -15,8 +15,7 @@ client = commands.Bot(command_prefix = "!", intents=discord.Intents.all())
 
 startList = [".START_JOURNAL", ".START_LOG", ".START_ENTRY", ".START_JOURNALING", ".NEW_ENTRY", ".NEW_LOG"]
 endList = [".END_JORNAL", ".END_LOG", ".END_ENTRY", ".STOP_JOURNALING", ".STOP_ENTRY"]
-readList = ["READ FROM"]
-
+readList = [".READ"]
 
 @client.event
 async def on_ready():
@@ -27,32 +26,51 @@ async def on_ready():
     except Exception as e:
         print(e)
 
+f = open("filepath.txt", "r")
+basePath = f.read()
+print(basePath)
+f.close()
+
 isJournaling = False
 @client.event
 async def on_message(message):
     global isJournaling
     global time
+    global f
     if message.author == client.user:
         return
-    if message.content.upper()[0:8] in readList and not(isJournaling):
+    if message.content.upper()[0:5] in readList and not(isJournaling):
         #read from file
-        now = time.gmtime()
+        date = message.content[6:]
+        print(date)
+        f = open((basePath+date), "r")
+        content = f.read()
+        await message.channel.send("Entry on " + date)
+        await message.channel.send(content)
         print("read entry")
     if message.content.upper() in startList and not(isJournaling):
         await message.channel.send("What is on the mind?")
-        print("started entry")
+        now = datetime.datetime.now()
         isJournaling = True
-    if isJournaling:
+        title = str(now.year) + "-" + str(now.month) + "-" + str(now.day)
+        f = open((basePath+title), "w")
+        if f.closed:
+            print ("file opened unsuccessfully")
+        else:
+            print("started entry")
+    elif isJournaling:
         if message.content.upper() in endList:
             await message.channel.send("What a day!")
             isJournaling = False
+            f.close()
+            f = None
             print("ended entry")
         else:
             #write to file
-            now = time.gmtime()
-            print("wrote entry")
-
-
+            f.write(message.content + "\n-----\n")
+            now = datetime.datetime.now()
+            print(now)
+            print("wrote into entry")
         
     print("message delivered: " + message.content)
 
