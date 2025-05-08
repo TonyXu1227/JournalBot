@@ -9,7 +9,8 @@ from discord import app_commands
 from discord.ext import commands
 
 load_dotenv()
-TOKEN = os.getenv('TOKEN')
+f = open("/Users/bigricce1227/Documents/Coding_Projects/Tokens_and_Keys/JournalBot_Token", "r")
+TOKEN = f.read()
 #print(TOKEN)
 client = commands.Bot(command_prefix = "!", intents=discord.Intents.all())
 
@@ -48,16 +49,21 @@ async def on_message(message):
         await message.channel.send("Entry on " + date)
         await message.channel.send(content)
         print("read entry")
-    if message.content.upper() in startList and not(isJournaling):
+    argspace = message.content.find(" ")
+    if message.content.upper()[:argspace] in startList and not(isJournaling):
         await message.channel.send("What is on the mind?")
         now = datetime.datetime.now()
         isJournaling = True
         title = str(now.year) + "-" + str(now.month) + "-" + str(now.day)
+        cont = message.content
+        if argspace != 0:
+            print("cust")
+            title = cont[argspace+1:]
         f = open((basePath+title), "w")
         if f.closed:
             print ("file opened unsuccessfully")
         else:
-            print("started entry")
+            print("started entry: " + title)
     elif isJournaling:
         if message.content.upper() in endList:
             await message.channel.send("What a day!")
