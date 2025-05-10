@@ -50,7 +50,7 @@ async def on_message(message):
         await message.channel.send(content)
         print("read entry")
     argspace = message.content.find(" ")
-    if message.content.upper()[:argspace] in startList and not(isJournaling):
+    if (message.content.upper()[:argspace] in startList) or (message.content.upper() in startList) and not(isJournaling):
         await message.channel.send("What is on the mind?")
         now = datetime.datetime.now()
         isJournaling = True
