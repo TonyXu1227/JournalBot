@@ -46,8 +46,15 @@ async def on_message(message):
         print(date)
         f = open((basePath+date), "r")
         content = f.read()
+        #print(content)
         await message.channel.send("Entry on " + date)
-        await message.channel.send(content)
+        iterator = int(len(content)/1995)+1
+        print(iterator)
+        for i in range(iterator):
+            start = i*1998
+            end = min(len(content), ((i+1)*1995))
+            payload = content[start: end] + "-->"
+            await message.channel.send(payload)
         print("read entry")
     argspace = message.content.find(" ")
     if (message.content.upper()[:argspace] in startList) or (message.content.upper() in startList) and not(isJournaling):
