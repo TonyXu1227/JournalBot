@@ -36,8 +36,11 @@ isJournaling = False
 @client.event
 async def on_message(message):
     global isJournaling
+    global query
+    global title
     global time
     global f
+    
     if message.author == client.user:
         return
     if message.content.upper()[0:5] in readList and not(isJournaling):
@@ -57,20 +60,29 @@ async def on_message(message):
             await message.channel.send(payload)
         print("read entry")
     argspace = message.content.find(" ")
+
+    #start an entry
     if (message.content.upper()[:argspace] in startList) or (message.content.upper() in startList) and not(isJournaling):
-        await message.channel.send("What is on the mind?")
         now = datetime.datetime.now()
-        isJournaling = True
-        title = str(now.year) + "-" + str(now.month) + "-" + str(now.day)
         cont = message.content
         if argspace != 0:
             print("cust")
             title = cont[argspace+1:]
-        f = open((basePath+title), "w")
-        if f.closed:
-            print ("file opened unsuccessfully")
+        if message.content.upper() in startList:
+            title = str(now.year) + "-" + str(now.month) + "-" + str(now.day)
+        if os.path.exists(basePath+title):
+            print("file already exists!!")
+            query = -1
+            await message.channel.send("That file exists! would you like to continue? (Type \"C\" to continue)")
         else:
-            print("started entry: " + title)
+            isJournaling = True
+            await message.channel.send("What is on the mind?")
+            f = open((basePath+title), "w")
+            if f.closed:
+                print ("file opened unsuccessfully")
+            else:
+                print("started entry: " + title)
+    # end an entry
     elif isJournaling:
         if message.content.upper() in endList:
             await message.channel.send("What a day!")
@@ -84,8 +96,20 @@ async def on_message(message):
             now = datetime.datetime.now()
             print(now)
             print("wrote into entry")
+    elif query == -1:
+        if message.content != "C":
+            query = 0
+        else:
+            isJournaling = True
+            await message.channel.send("What is on the mind?")
+            f = open((basePath+title), "w")
+            if f.closed:
+                print ("file opened unsuccessfully")
+            else:
+                print("started entry: " + title)
         
-    print("message delivered: " + message.content)
+    print("message delivered: " + message.content + " ")
+    print(query)
 
 @client.tree.command(name = "read")
 async def hello(interaction: discord.Interaction):
